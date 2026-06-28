@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizWhiz | Asynchronous Trivia</title>
+  <script type="module" crossorigin src="/assets/index-BPfe-LvI.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BT0BO10z.css">
+</head>
+<body class="bg-[#0f172a] text-[#f8fafc] min-h-screen flex justify-center items-center p-5 bg-cover bg-center bg-no-repeat bg-fixed transition-[background-image] duration-500 relative">
+
+    <button id="mute-btn" class="absolute top-4 right-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 p-2.5 rounded-full transition-all text-xl focus:outline-none z-10" title="Toggle Audio">
+        🔊
+    </button>
+
+    <main class="quiz-container bg-slate-950/75 backdrop-blur-md border border-slate-700/50 w-full max-w-150 p-6 md:p-8 rounded-xl shadow-2xl transition-all duration-300">
+        
+        <section id="welcome-screen" class="screen flex flex-col gap-5 text-center">
+                <div id="auth-status-panel" class="mb-4 text-right text-xs p-2 bg-slate-800/40 rounded-lg border border-slate-700/50 flex justify-between items-center">
+                 <span id="auth-user-text" class="text-slate-400 font-medium">Playing as: <strong class="text-blue-400">Guest</strong></span>
+                <button id="auth-toggle-btn" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white font-semibold transition">Log In / Sign Up</button>
+                </div>
+
+                <div id="auth-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div class="bg-slate-900 border border-slate-800 w-full max-w-sm p-6 rounded-2xl shadow-xl flex flex-col gap-4">
+                <h3 id="auth-modal-title" class="text-lg font-bold text-slate-100">Access Account</h3>
+                <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-blue-500">
+                <input type="password" id="auth-password" placeholder="Password" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-blue-500">
+        
+                <div class="flex flex-col gap-2 mt-2">
+            <button id="auth-submit-login" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white transition text-sm">Sign In</button>
+            <button id="auth-submit-register" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold text-slate-300 transition text-sm">Create Account</button>
+            <button id="auth-close-modal" class="w-full py-2 text-slate-500 text-xs font-semibold hover:text-slate-400 mt-1">Continue as Guest</button>
+            </div>
+            </div>
+            </div>
+            <h1 class="text-4xl font-extrabold tracking-tight mt-2">🧠 QuizWhiz</h1>
+            <p class="text-slate-400 text-sm md:text-base">Test your knowledge with real-time asynchronous trivia!</p>
+            
+            <div class="flex flex-col gap-4 text-left my-2">
+                <div class="category-container flex flex-col gap-2">
+                    <label for="category-select" class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Choose Your Topic:</label>
+                    <select id="category-select" class="select-dropdown w-full p-3 bg-slate-800 border-2 border-slate-700 text-white rounded-md outline-none cursor-pointer focus:border-blue-500 transition-colors">
+                        <option value="">Miscellaneous / Any Category</option>
+                        <option value="17">Science & Nature</option>
+                        <option value="23">History</option>
+                        <option value="21">Sports</option>
+                        <option value="22">Geography</option>
+                        <option value="11">Films & Movies</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label for="difficulty-select" class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Choose Difficulty:</label>
+                    <select id="difficulty-select" class="w-full p-3 bg-slate-800 border-2 border-slate-700 text-white rounded-md outline-none cursor-pointer focus:border-blue-500 transition-colors">
+                        <option value="">Any Difficulty</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label for="type-select" class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Question Format:</label>
+                    <select id="type-select" class="w-full p-3 bg-slate-800 border-2 border-slate-700 text-white rounded-md outline-none cursor-pointer focus:border-blue-500 transition-colors">
+                        <option value="multiple">Multiple Choice</option>
+                        <option value="boolean">True / False</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="start-btn" class="btn primary-btn w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition duration-200 shadow-lg shadow-blue-600/20">Start Quiz</button>
+            <button id="view-highscores-btn" class="btn secondary-btn w-full py-3 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-md transition duration-200">View Leaderboard</button>
+        </section>
+
+        <section id="quiz-screen" class="screen hidden flex flex-col gap-5">
+            <div class="quiz-header flex justify-between font-bold text-slate-400 text-sm">
+                <div id="progress">Question 1 of 10</div>
+                <div id="timer" class="text-amber-500">Time Left: <span id="time-left">15</span>s</div>
+            </div>
+
+            <div class="progress-container w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="progress-bar-fill" class="h-full w-0 bg-blue-500 transition-all duration-300 ease-in-out"></div>
+            </div>
+
+            <div class="score-tracker text-right font-semibold text-emerald-400 text-sm">Score: <span id="current-score">0</span></div>
+
+            <h2 id="question-text" class="text-xl font-medium leading-relaxed my-2 text-center">Loading cosmic questions...</h2>
+            <button id="quiz-error-btn" class="btn secondary-btn hidden w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-md transition duration-200 mt-4">
+                    Return to Main Menu
+            </button>
+            <div id="answer-containers" class="answers-grid grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                </div>
+        </section>
+
+        <section id="end-screen" class="screen hidden flex flex-col gap-5 text-center">
+            <div id="game-over-container" class="flex flex-col gap-2">
+                 <h2 class="text-3xl font-extrabold text-red-400 tracking-tight">Game Over!</h2>
+                 <p class="text-lg text-slate-300">Your final score is: <span id="final-score" class="text-white font-bold text-xl">0</span></p>
+                 <p id="score-message" class="text-sm max-w-sm mx-auto"></p> 
+                 
+                 <button id="game-over-btn" class="btn primary-btn hidden w-full py-2.5 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-md transition duration-200 shadow-md shadow-emerald-600/10">
+                     Review Answers
+                 </button>
+            </div>
+
+            <div id="save-score-container" class="flex gap-2 justify-center items-center mt-1">
+                <input type="text" id="username" placeholder="Enter your name" maxlength="25" class="w-32 p-3 bg-slate-900 border-2 border-slate-700 text-white rounded-md font-bold text-center uppercase tracking-wider outline-none focus:border-blue-500">
+                <button id="save-score-btn" class="btn primary-btn px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition duration-200 whitespace-nowrap">Save Score</button>
+            </div>
+
+            <hr class="border-slate-800 my-1">
+
+            <hr class="border-slate-800 my-4">
+
+            <div class="flex justify-between items-center mb-2 px-1">
+                <h3 class="text-xl font-bold text-slate-300 flex items-center gap-2">🏆 Leaderboard</h3>
+                <select id="leaderboard-filter" class="p-2 bg-slate-800 border-2 border-slate-700 text-white rounded-md outline-none cursor-pointer focus:border-blue-500 text-sm transition-colors">
+                    <option value="any">Standard (Any)</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            
+            <table id="leaderboard-table" class="w-full border-collapse text-left text-sm mt-1">
+                <thead>
+                    <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-xs">
+                        <th class="py-2">Rank</th>
+                        <th class="py-2">Player</th>
+                        <th class="py-2">Score</th>
+                    </tr>
+                </thead>
+                <tbody id="high-scores-list" class="text-slate-300 divide-y divide-slate-800/50">
+                    </tbody>
+            </table>
+
+            <button id="home-btn" class="btn secondary-btn w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-md transition duration-200 mt-2">Play Again</button>
+        </section>
+
+        <section id="review-screen" class="screen hidden flex flex-col gap-4">
+            <h2 class="text-2xl font-bold text-slate-200 tracking-tight">Review Your Answers</h2>
+            <div id="review-list" class="flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-1 text-left scrollbar-custom">
+                </div>
+            <button id="back-to-end-btn" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-md transition duration-200">
+                Back to Results
+            </button>
+        </section>
+
+    </main>
+
+</body>
+</html>
